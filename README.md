@@ -21,6 +21,12 @@ df = ys.create_dataframe()
 ys.split_and_save_project(DF=df,output_dir="MyDataset-splitted",train_size=0.70)
 
 ```
+```
+!ls MyDataset-splitted
+---------------------
+data.yaml  train  val
+```
+
 ```python
 # Dataframe contains Image names, Label names, annoations and class names.
 # In the dataframe, we can observe the number of classes present in each image. 
