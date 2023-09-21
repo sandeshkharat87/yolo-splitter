@@ -25,6 +25,7 @@ ys.split_and_save_project(DF=df,output_dir="MyDataset-splitted",train_size=0.70)
 # Dataframe contains Image names, Label names, annoations and class names.
 # In the dataframe, we can observe the number of classes present in each image. 
 ```
+![2023-09-21_19-22](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/bba5a794-3f4b-47d2-bb77-65b06b135f15)
 
 
 
