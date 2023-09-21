@@ -21,6 +21,9 @@ df = ys.create_dataframe()
 ys.split_and_save_project(DF=df,output_dir="MyDataset-splitted",train_size=0.70)
 
 ```
+![2023-09-21_19-16](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/f28096d0-b287-4f68-b751-2b5c7a67e5ae)
+
+
 
 ### Input Directory
 ```
