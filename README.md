@@ -3,6 +3,4 @@ Tool that makes it easy to split YOLOs images and their associated labels into s
 
 Input Directory contains mixed Images and Labels
 
-<img src="assets/dataframe.png" width="300"/>
-
 ![mixed!](assets/dataframe.png)
