@@ -5,4 +5,4 @@ Input Directory contains mixed Images and Labels
 
 <img src="assets/dataframe.png" width="300"/>
 
-![](assets/dataframe.png)
+![mixed!](assets/dataframe.png)
