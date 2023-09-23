@@ -13,7 +13,7 @@ from yolosplitter import YoloSplitter
 
 ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
-# creates the dataframe
+# create dataframe
 df = ys.from_mixed_dir(main_dir="mydataset/")
 
 # saves the Images and labels in "new_dataset" dir. with data.yaml file.
