@@ -11,13 +11,12 @@ pip install yolosplitter
 ```python
 from yolosplitter import YoloSplitter
 
-# give directory path containing Image and Labels
 ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
 # creates the dataframe
 df = ys.from_mixed_dir(main_dir="mydataset/")
 
-# saves the Images and labels in "new_dataset" dir. with data.yaml
+# saves the Images and labels in "new_dataset" dir. with data.yaml file.
 ys.split_and_save(DF=df,output_dir="new_dataset",train_size=0.70)
 
 ```
@@ -32,7 +31,8 @@ df
 df = ys.from_yolo_dir(image_dir="mydataset-splitted/train/images/",label_dir="mydataset-splitted/train/labels/")
 df
 ```
-![Uploading from_yolo_dir.png…]()
+![from_yolo_dir](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/f9c4f03a-0287-4537-8dad-c662e78d7a55)
+
 
 
 
