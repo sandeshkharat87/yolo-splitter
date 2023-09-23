@@ -12,7 +12,7 @@ pip install yolosplitter
 from yolosplitter import YoloSplitter
 
 # give directory path containing Image and Labels
-ys = YoloSplitter(input_dir="MyDataset/")
+ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
 # creates the dataframe
 df = ys.from_mixed_dir(main_dir="mydataset/")
