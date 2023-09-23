@@ -1,60 +1,77 @@
 import pandas as pd
-import shutil as sh
 import os
+import tqdm
+import shutil as sh
 import yaml
-import  tqdm
+
 
 
 class YoloSplitter():
     """
-    root: Input Directory
+    imgFormat = [".jpg", ".jpeg", ".png",]
+    Give new extensions in list ex. [ ".tiff", ".jpg", ".jpeg", ".png",]
+
+    labelFormat = [".txt"]
     """
-    def __init__(self,input_dir):
-        self.input_dir = input_dir
+    def __init__(self,imgFormat= [".jpg", ".jpeg", ".png"],labelFormat=[".txt"]):
+        self.imgFormat = imgFormat
+        self.labelFormat = labelFormat
+        self.__image_dir = None
+        self.__label_dir = None
 
-    def create_dataframe(self,imgFormat=None,labelFormat=None):
+
+    def from_mixed_dir(self,main_dir):
         """
-        Returns DataFrame containing images,labels,annotations,classes
-        By default Image fromats are [".jpg", ".jpeg", ".png"]
-        By default Label fromats are [".txt"]
-
+        main_dir = Main dir path
+        Path containing both Images and Labels in single directory.
         """
-        if imgFormat is None:
-            imgFormat = [".jpg", ".jpeg", ".png"]
-
-        if labelFormat is None:
-            labelFormat = [".txt"]
-
-
+        self.__image_dir = main_dir
+        self.__label_dir = main_dir
+        dataset = self.get_data(image_dir=self.__image_dir, label_dir=self.__label_dir)
+        df = pd.DataFrame.from_dict(dataset)
+        return df
 
 
+    def from_yolo_dir(self,image_dir,label_dir):
+        """
+        image_dir = image dir path
+        label_dir = label dir path
+        """
+        self.__image_dir = image_dir
+        self.__label_dir = label_dir
+        dataset = self.get_data(image_dir=self.__image_dir, label_dir=self.__label_dir)
+        df = pd.DataFrame.from_dict(dataset)
+        return df
 
-        # Collect all images and labels
-        All_Images = [i for i in os.listdir(
-            f"{self.input_dir}/") if os.path.splitext(i)[-1] in imgFormat]
-        All_Labels = [i for i in os.listdir(
-            f"{self.input_dir}/") if os.path.splitext(i)[-1] in labelFormat]
-
-        # match image name with label name if matches collect there annotations
-        # saved them in the dict.
+    def get_data(self,image_dir,label_dir):
         dataset = {"images":[], "labels":[], "annots":[],"cls_names":[] }
+
+
+        All_Images = [i for i in os.listdir(
+            f"{image_dir}") if os.path.splitext(i)[-1] in self.imgFormat]
+        All_Labels = [i for i in os.listdir(
+            f"{label_dir}") if os.path.splitext(i)[-1] in self.labelFormat]
+
         for iname in All_Images:
             for lname in All_Labels:
                 if os.path.splitext(iname)[0] == os.path.splitext(lname)[0]:
-                    annot_data,cls_names = self.__read_annot(value=lname)
+                    annot_data,cls_names = self.__read_annot(label_file_name=lname)
                     dataset["images"].append(iname)
                     dataset["labels"].append(lname)
                     dataset["annots"].append(annot_data)
                     dataset["cls_names"].append(cls_names)
                 else:
                     continue
-        return pd.DataFrame.from_dict(dataset)
 
-    # Read annotation from label files
-    def __read_annot(self,value):
+
+        return dataset
+
+   # Read annotation from label files
+    def __read_annot(self,label_file_name):
+        annotation_file_name = os.path.join(self.__label_dir,label_file_name)
         annot_data = []
         all_cls_names = []
-        with open(self.input_dir+"/"+value,"r") as f:
+        with open(annotation_file_name,"r") as f:
             f_data = f.read().split("\n")
             for i in f_data:
                 i = i.split(" ")
@@ -64,20 +81,25 @@ class YoloSplitter():
                 all_cls_names.append(cls_name)
         return annot_data,list(set(all_cls_names))
 
-
-
-    def split_and_save_project(self,DF,output_dir,train_size=0.70,force=False):
+    def split_and_save(self,DF,output_dir,train_size=0.70,overwrite=False):
         """
-        DF = Dataframe created from `def create_dataframe()`
-        output_dir = Output Dir || (train,val,data.yaml) will be saved in Output Dir
-        train_size = 0.70 || split dataframe in to (train:0.70 + val:0.30) if train_size = 0.60 then (train:0.60 + val:0.40)
-        force = True || To Overwrite the existing Output Dirs (train,val,data.yaml)
+        DF: dataframe (pandas dataframe)
+        Get datafrmae from 'from_mixed_dir' or 'from_yolo_dir'
+
+        outputdir: Directory name
+        New files will be saved to output dir
+
+        train_size: 0.70
+        Dataframe will be splitted in (70% + 30%) (train+val)
+
+        overwrite: False
+        True if you want to overwrite the existing files and folders
         """
-        if not force:
+        if not overwrite:
             if os.path.exists(output_dir):
-                raise FileExistsError("Folder already exists ... ")
-        os.makedirs(output_dir, exist_ok=True)
-        print(f"Writing Data In -> {output_dir}")
+                raise Exception("Folder Already Exixts !!!")
+        else:
+            pass
 
         # YAML file
         yamlFile = {"train": "", "val": "", "nc": 0, "names": ""}
@@ -104,22 +126,21 @@ class YoloSplitter():
             for idx,row in tqdm.tqdm(df_name.iterrows(),total=len(df_name),desc=dir_name):
 
                 # Copying Images
-                sh.copy2(src=os.path.join(self.input_dir, row["images"])
+                sh.copy2(src=os.path.join(self.__image_dir, row["images"])
                          ,dst = os.path.join(image_dir,row["images"]) )
 
                 # Copying Labels
-                sh.copy2(src=os.path.join(self.input_dir, row["labels"])
+                sh.copy2(src=os.path.join(self.__label_dir, row["labels"])
                          ,dst = os.path.join(label_dir,row["labels"]))
 
 
         # Saving YAML File
         yamlFile["nc"] = len(cls_names)
         yamlFile["names"] = cls_names
-        yamlFile["train"] = os.path.join(output_dir, "train/")
-        yamlFile["val"] = os.path.join(output_dir, "val/")
+        yamlFile["train"] = os.path.join(output_dir, "train")
+        yamlFile["val"] = os.path.join(output_dir, "val")
 
         with open(os.path.join(output_dir, "data.yaml"), "w") as f:
             yaml.dump(yamlFile, f, indent=2)
-
 
 
