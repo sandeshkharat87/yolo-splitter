@@ -28,6 +28,7 @@ df
 ![from_mixed_dir](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/93347b2a-c245-4509-ab15-ae169f3680b3)
 
 ```python
+# When Image and Labels are in diffrent directory (Default yolo train and val directories)
 df = ys.from_yolo_dir(image_dir="mydataset-splitted/train/images/",label_dir="mydataset-splitted/train/labels/")
 df
 ```
