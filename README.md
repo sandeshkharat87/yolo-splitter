@@ -15,20 +15,31 @@ from yolosplitter import YoloSplitter
 ys = YoloSplitter(input_dir="MyDataset/")
 
 # creates the dataframe
-df = ys.create_dataframe()
+df = ys.from_mixed_dir(main_dir="mydataset/")
 
 # saves the Images and labels in "new_dataset" dir. with data.yaml
-ys.split_and_save_project(DF=df,output_dir="MyDataset-splitted",train_size=0.70)
+ys.split_and_save(DF=df,output_dir="new_dataset",train_size=0.70)
 
 ```
+```python
+df = ys.from_mixed_dir(main_dir="mydataset/")
+df
+```
+![from_mixed_dir](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/93347b2a-c245-4509-ab15-ae169f3680b3)
+
+```python
+df = ys.from_yolo_dir(image_dir="mydataset-splitted/train/images/",label_dir="mydataset-splitted/train/labels/")
+df
+```
+![Uploading from_yolo_dir.png…]()
+
+
+
 
 ```python
 # Dataframe contains Image names, Label names, annoations and class names.
 # In the dataframe, we can observe the number of classes present in each image. 
 ```
-![2023-09-21_19-22](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/bba5a794-3f4b-47d2-bb77-65b06b135f15)
-
-
 
 
 ### Input Directory
