@@ -20,6 +20,9 @@ df = ys.from_mixed_dir(input_dir="mydataset/")
 ys.split_and_save(DF=df,output_dir="new_datset", ratio=(0.7, 0.2,0.1 ) ,save=False,shuffle=False)
 
 ```
+![split_and_save](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/5e5dc779-f28b-4439-bdbe-17ed7761f407)
+
+
 ![mixed](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/9a0e7601-9912-4665-bfc3-35ab828491a3)
 
 
