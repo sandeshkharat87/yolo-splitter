@@ -14,25 +14,22 @@ from yolosplitter import YoloSplitter
 ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
 # create dataframe
-df = ys.from_mixed_dir(main_dir="mydataset/")
+df = ys.from_mixed_dir(input_dir="mydataset/")
 
 # saves the Images and labels in "new_dataset" dir. with data.yaml file.
-ys.split_and_save(DF=df,output_dir="new_dataset",train_size=0.70)
+ys.split_and_save(DF=df,output_dir="new_datset", ratio=(0.7, 0.2,0.1 ) ,save=False,shuffle=False)
 
 ```
-```python
-df = ys.from_mixed_dir(main_dir="mydataset/")
-df
-```
-![from_mixed_dir](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/93347b2a-c245-4509-ab15-ae169f3680b3)
+![mixed](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/9a0e7601-9912-4665-bfc3-35ab828491a3)
+
 
 ```python
-# When Image and Labels are in diffrent directory (Default yolo train and val directories)
-df = ys.from_yolo_dir(image_dir="mydataset-splitted/train/images/",label_dir="mydataset-splitted/train/labels/")
+# YOLO directory contaning (train,valid,test) 
+df = ys.from_yolo_dir("pot_holes")
 df
 ```
-![from_yolo_dir](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/f9c4f03a-0287-4537-8dad-c662e78d7a55)
 
+![from_yolo](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/98096445-d988-4818-bfd6-83bf7a8220ea)
 
 
 
