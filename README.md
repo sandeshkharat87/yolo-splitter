@@ -13,7 +13,7 @@ from yolosplitter import YoloSplitter
 
 ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
-# create dataframe
+# use this function if Image & Labels are in the same folder 
 df = ys.from_mixed_dir(input_dir="mydataset")
 
 # If folder contains train test valid set already (yolo dataset)
