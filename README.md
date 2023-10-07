@@ -14,9 +14,13 @@ from yolosplitter import YoloSplitter
 ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
 # create dataframe
-df = ys.from_mixed_dir(input_dir="mydataset/")
+df = ys.from_mixed_dir(input_dir="mydataset")
+
+# If folder contains train test valid set already (yolo dataset)
+df = ys.from_yolo_dir("mydataset")
 
 # saves the Images and labels in "new_dataset" dir. with data.yaml file.
+# change save=True  if you want to create new dataset
 ys.split_and_save(DF=df,output_dir="new_datset", ratio=(0.7, 0.2,0.1 ) ,save=False,shuffle=False)
 
 ```
