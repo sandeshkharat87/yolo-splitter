@@ -1,0 +1,6 @@
+notebooks
+.ipynb_checkpoints
+.jupyter
+__pycache__
+versions
+samples
