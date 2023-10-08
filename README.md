@@ -24,6 +24,14 @@ ys.show_dataframe
 
 
 
+```python
+ys.save_split(output_dir="potholes")
+```
+
+```bash
+Saving New split in 'potholes' dir
+100%|██████████| 118/118 [00:00<00:00, 1352.79it/s]
+```
 
 
 
