@@ -13,7 +13,7 @@ class Yolosplitter():
         self.__error_files = []
         self.__req_cols = ['images', 'labels',  'annots', 'cls_names', 'set', 'new_set']
         
-    def from_mixed_dir(self,input_dir,ratio=(0.70,0.20,0.10),save=False):
+    def from_mixed_dir(self,input_dir,ratio=(0.70,0.20,0.10)):
         self.__DATAFRAME = None
         self.__error_files = []
 
@@ -34,7 +34,7 @@ class Yolosplitter():
         return self.__DATAFRAME[self.__req_cols]
         
     
-    def from_yolo_dir(self,input_dir,ratio=(0.70,0.20,0.10),save=False):
+    def from_yolo_dir(self,input_dir,ratio=(0.70,0.20,0.10)):
         self.__DATAFRAME = None
         self.__error_files = []
         self.__input_dir = input_dir
