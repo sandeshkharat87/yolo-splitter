@@ -34,15 +34,6 @@ Saving New split in 'potholes' dir
 ```
 
 
-
-
-
-```python
-# Dataframe contains Image names, Label names, annoations and class names.
-# In the dataframe, we can observe the number of classes present in each image. 
-```
-
-
 ### Input Directory
 ```
 MyDataset/
