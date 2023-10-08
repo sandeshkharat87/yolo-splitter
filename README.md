@@ -1,5 +1,5 @@
 # yolo-splitter
-Tool to create YOLO dataset
+Tool to create,modify YOLO dataset.
 
 ## Installation
 ```bash
