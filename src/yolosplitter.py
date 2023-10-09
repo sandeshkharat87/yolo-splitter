@@ -143,10 +143,15 @@ class Yolosplitter():
         train_df = input_df.iloc[:train_length].copy()
         val_df = input_df.iloc[train_length:train_length+val_length].copy()
         test_df = input_df.iloc[train_length + val_length:].copy()
+
+        # Shuffle new_set column to new set
+        set_names = ['train'] * train_length + ['valid'] * val_length + ['test'] * test_length
+        random.shuffle(set_names)
         
-        train_df["new_set"] = "train"
-        val_df["new_set"] = "valid"
-        test_df["new_set"]= "test"
+        train_df["new_set"] = set_names[:train_length]
+        val_df["new_set"] = set_names[train_length:train_length + val_length]
+        test_df["new_set"] = set_names[train_length + val_length:]
+
         
         splitted_df = pd.concat([train_df,val_df,test_df],ignore_index=True,sort=False)
         print(f"\nTrain size:{train_length},Validation size:{val_length},Test size :{test_length}\n")
