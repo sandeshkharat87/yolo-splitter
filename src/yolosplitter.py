@@ -5,7 +5,7 @@ import shutil as sh
 import yaml
 
 
-class Yolosplitter():
+class YoloSplitter():
     """
     imgFormat:[".jpg", ".jpeg", ".png"]
     Give image format in the list
