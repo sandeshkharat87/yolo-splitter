@@ -6,6 +6,13 @@ import yaml
 
 
 class Yolosplitter():
+    """
+    imgFormat:[".jpg", ".jpeg", ".png"]
+    Give image format in the list
+
+    lableFormat:[".txt"]
+    Give label format in th list
+    """
     def __init__(self,imgFormat= [".jpg", ".jpeg", ".png"],labelFormat=[".txt"]):
         self.imgFormat = imgFormat
         self.labelFormat = labelFormat
@@ -14,6 +21,10 @@ class Yolosplitter():
         self.__req_cols = ['images', 'labels',  'annots', 'cls_names', 'set', 'new_set']
         
     def from_mixed_dir(self,input_dir,ratio=(0.70,0.20,0.10)):
+        """
+        input_dir : Provide directory path
+        ratio: rato of split train/val/test (0.70,0.20,0.10)
+        """
         self.__DATAFRAME = None
         self.__error_files = []
 
@@ -35,6 +46,10 @@ class Yolosplitter():
         
     
     def from_yolo_dir(self,input_dir,ratio=(0.70,0.20,0.10)):
+        """
+        input_dir : Provide directory path
+        ratio: rato of split train/val/test (0.70,0.20,0.10)
+        """
         self.__DATAFRAME = None
         self.__error_files = []
         self.__input_dir = input_dir
@@ -151,6 +166,9 @@ class Yolosplitter():
 
 
     def save_split(self,output_dir):
+        """
+        output_dir: Oupt dir path
+        """
 
         input_df = self.__DATAFRAME
         

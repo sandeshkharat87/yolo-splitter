@@ -33,6 +33,15 @@ Saving New split in 'potholes' dir
 100%|██████████| 118/118 [00:00<00:00, 1352.79it/s]
 ```
 
+```
+# Use ys.show_show_errors  to show filename which have errors
+ys.show_show_errors
+
+# Use ys.show_dataframe to see dataframe created on the dataset
+ys.show_dataframe
+
+```
+
 
 ### Input Directory
 ```
