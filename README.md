@@ -35,7 +35,7 @@ Saving New split in 'potholes' dir
 
 ```python
 # Use ys.show_show_errors  to show filename which have errors
-ys.show_show_errors
+ys.show_errors
 
 # Use ys.show_dataframe to see dataframe created on the dataset
 ys.show_dataframe
