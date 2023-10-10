@@ -174,6 +174,8 @@ class YoloSplitter():
         """
         output_dir: Oupt dir path
         """
+        if os.path.exists(output_dir):
+            raise FileExistsError("Folder already exists ...")
 
         input_df = self.__DATAFRAME
         
