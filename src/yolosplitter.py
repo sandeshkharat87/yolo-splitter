@@ -212,7 +212,7 @@ class YoloSplitter():
         yamlFile["names"] = cls_names
         yamlFile["train"] = os.path.join(output_dir, "train")
         if valid_set != 0:
-            yamlFile["val"] = os.path.join(output_dir, "val")
+            yamlFile["val"] = os.path.join(output_dir, "valid")
         if test_set != 0:
             yamlFile["test"] = os.path.join(output_dir, "test")
 
