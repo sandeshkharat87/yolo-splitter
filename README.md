@@ -13,12 +13,17 @@ from yolosplitter import YoloSplitter
 ys = YoloSplitter(imgFormat=['.jpg', '.jpeg', '.png'], labelFormat=['.txt'] )
 
 # If you have yolo-format dataset already on the system
-df = ys.from_yolo_dir(input_dir="yolo_dataset",ratio=(0.7,0.2,0.1))
+df = ys.from_yolo_dir(input_dir="yolo_dataset",ratio=(0.7,0.2,0.1),return_df=True)
 
 # If you have mixed Images and Labels in the same directory
-df = ys.from_mixed_dir(input_dir="mydataset",ratio=(0.7,0.2,0.1))
+df = ys.from_mixed_dir(input_dir="mydataset",ratio=(0.7,0.2,0.1),return_df=True)
 
-ys.show_dataframe
+# To see train/test/val split size, total error files, all class names from annotation files
+ys.info()
+
+# !!! changed show_dataframe to get_dataframe()
+# to see dataframe
+ys.get_dataframe()
 ```
 ![2023-10-08_23-28](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/6e08285d-59c5-4856-8bb5-2eac5f1ec3da)
 
@@ -35,11 +40,13 @@ Saving New split in 'potholes' dir
 
 ```python
 # Use ys.show_show_errors  to show filename which have errors
-ys.show_errors
+ys.show_errors()
 
 # Use ys.show_dataframe to see dataframe created on the dataset
-ys.show_dataframe
+ys.get_dataframe()
 
+# To see train/test/val split size, total error files, all class names from annotation files
+ys.info()
 ```
 
 
@@ -99,3 +106,13 @@ MyDataset-splitted/
         ├── 06.txt
         └── 11.txt
 ```
+# Change Log
+## Stable
+
+* 2023-12-19 version 4.7
+    * Fix output dir of `val` to `valid` thanks to [https://github.com/AndreasFridh]
+    * Added `ys.info()` To see train/test/val split size, total error files, all class names from annotation files
+    * Changed `ys.show_dataframe` to `ys.get_dataframe()`
+    * small bug fixes
+    
+

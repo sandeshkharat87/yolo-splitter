@@ -3,6 +3,7 @@ import os
 import tqdm
 import shutil as sh
 import yaml
+import random
 
 
 class YoloSplitter():
@@ -19,8 +20,11 @@ class YoloSplitter():
         self.__DATAFRAME = None
         self.__error_files = []
         self.__req_cols = ['images', 'labels',  'annots', 'cls_names', 'set', 'new_set']
-        
-    def from_mixed_dir(self,input_dir,ratio=(0.70,0.20,0.10)):
+        self.__info = None
+
+        # {"train":None,"val":None,"test":None,"cls_names":None}
+
+    def from_mixed_dir(self,input_dir,ratio=(0.70,0.20,0.10),return_df=False):
         """
         input_dir : Provide directory path
         ratio: rato of split train/val/test (0.70,0.20,0.10)
@@ -41,11 +45,17 @@ class YoloSplitter():
         
         
         self.__DATAFRAME = splitted_df
+
+        print(self.info())
+
+        if return_df:
+            return self.__DATAFRAME[self.__req_cols]
+        return None
+
         
-        return self.__DATAFRAME[self.__req_cols]
         
     
-    def from_yolo_dir(self,input_dir,ratio=(0.70,0.20,0.10)):
+    def from_yolo_dir(self,input_dir,ratio=(0.70,0.20,0.10),return_df=False):
         """
         input_dir : Provide directory path
         ratio: rato of split train/val/test (0.70,0.20,0.10)
@@ -76,7 +86,12 @@ class YoloSplitter():
         
         self.__DATAFRAME = splitted_df
         
-        return splitted_df[self.__req_cols]
+        print(self.info())
+
+        if return_df:
+            return self.__DATAFRAME[self.__req_cols]
+
+        return None
         
     
     def get_data(self,image_dir,label_dir):
@@ -99,7 +114,7 @@ class YoloSplitter():
                         dataset["annots"].append(annot_data)
                         dataset["cls_names"].append(cls_names)
                     except Exception as e:
-                        self.__error_files.append([os.path.join(label_dir,lname),e])
+                       self.__error_files.append([os.path.join(label_dir,lname),e])
                 else:
                     continue
 
@@ -156,19 +171,22 @@ class YoloSplitter():
         splitted_df = pd.concat([train_df,val_df,test_df],ignore_index=True,sort=False)
         print(f"\nTrain size:{train_length},Validation size:{val_length},Test size :{test_length}\n")
 
+        _cls_names =set([ name for name_list in  splitted_df["cls_names"]
+                              for name in name_list ])
+
+        self.__info = {"train":train_length,"val":val_length,"test":test_length,"cls_names":_cls_names,"errors":len(self.show_errors())}
+
         
         return splitted_df
     
-    @property
     def show_errors(self):    
         return self.__error_files
     
-    @property
-    def show_dataframe(self):
+    def get_dataframe(self):
         return self.__DATAFRAME[self.__req_cols]
     
-        
-
+    def info(self):
+        return self.__info
 
     def save_split(self,output_dir):
         """
@@ -219,3 +237,4 @@ class YoloSplitter():
         with open(os.path.join(output_dir, "data.yaml"), "w") as f:
             yaml.dump(yamlFile, f, indent=2)
 
+ 
