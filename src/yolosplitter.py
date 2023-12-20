@@ -235,6 +235,6 @@ class YoloSplitter():
             yamlFile["test"] = os.path.join(output_dir, "test")
 
         with open(os.path.join(output_dir, "data.yaml"), "w") as f:
-            yaml.dump(yamlFile, f, indent=2)
+            yaml.dump(yamlFile, f, indent=2,default_flow_style=None)
 
  
