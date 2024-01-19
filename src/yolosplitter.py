@@ -4,7 +4,8 @@ import tqdm
 import shutil as sh
 import yaml
 import random
-
+import json
+import numpy as np
 
 class YoloSplitter():
     """
@@ -99,25 +100,41 @@ class YoloSplitter():
         
         All_Images = [i for i in os.listdir(
             f"{image_dir}") if os.path.splitext(i)[-1] in self.imgFormat]
-        All_Labels = [i for i in os.listdir(
-            f"{label_dir}") if os.path.splitext(i)[-1] in self.labelFormat]
+            
+        All_Labels = None
+        if self.labelFormat == ['.txt']:
+            # avoids processing classes.txt file inside current directory
+            All_Labels = [i.split('.')[0] for i in os.listdir(f"{label_dir}") if os.path.splitext(i)[-1] in self.labelFormat and i!='classes.txt']
+        elif self.labelFormat==['.json']:
+            All_Labels = [i.split('.')[0] for i in os.listdir(f"{label_dir}") if os.path.splitext(i)[-1] in self.labelFormat]
+
 
         for iname in All_Images:
-            for lname in All_Labels:
-                if os.path.splitext(iname)[0] == os.path.splitext(lname)[0]:
-                    try:
+            if os.path.splitext(iname)[0] in All_Labels:
+                # lname= f"{os.path.splitext(iname)[0]}.json"
+                lname = None
+                if self.labelFormat == ['.txt']:
+                    lname= f"{os.path.splitext(iname)[0]}.txt"
+                elif self.labelFormat==['.json']:
+                    lname = f"{os.path.splitext(iname)[0]}.json"
+                try:
+                    annot_data = None
+                    cls_names = None
+                    if self.labelFormat == ['.txt']:
                         annot_data,cls_names = self.__read_annot(os.path.join(label_dir,lname))
-                        dataset["images_path"].append(os.path.join(image_dir,iname))
-                        dataset["labels_path"].append(os.path.join(label_dir,lname))
-                        dataset["images"].append(os.path.join(iname))
-                        dataset["labels"].append(os.path.join(lname))
-                        dataset["annots"].append(annot_data)
-                        dataset["cls_names"].append(cls_names)
-                    except Exception as e:
-                       self.__error_files.append([os.path.join(label_dir,lname),e])
-                else:
-                    continue
-
+                    elif self.labelFormat==['.json']:
+                        annot_data,cls_names = self.__read_json_annot(os.path.join(label_dir,lname))
+                    dataset["images_path"].append(os.path.join(image_dir,iname))
+                    dataset["labels_path"].append(os.path.join(label_dir,lname))
+                    dataset["images"].append(os.path.join(iname))
+                    dataset["labels"].append(lname)
+                    dataset["annots"].append(annot_data)
+                    dataset["cls_names"].append(cls_names)
+                except Exception as e:
+                    print(f"Error in get_data: {e}")
+                    self.__error_files.append([os.path.join(label_dir,lname),e])
+            else:
+                continue
         return dataset
     
     
@@ -134,6 +151,16 @@ class YoloSplitter():
                 all_cls_names.append(cls_name)
         return annot_data,list(set(all_cls_names))
     
+    def __read_json_annot(self,path):
+        annot_data = []
+        all_cls_names = []
+        with open(path,"r") as f:
+            f_data = json.load(f)
+            for shape in f_data["shapes"]:
+                cls_name = shape['label']
+                cls_annot = np.array(shape['points']).flatten()
+                all_cls_names.append(cls_name)
+        return annot_data,list(set(all_cls_names))
     
     def __make_split(self,input_df,ratio):
         
