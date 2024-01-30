@@ -127,7 +127,7 @@ class YoloSplitter():
         with open(path,"r") as f:
             f_data = f.read().split("\n")
             for i in f_data:
-                i = i.split(" ")
+                i = i.strip().split(" ")
                 cls_name = int(i[0])
                 cls_annot = [float(i) for i in i[1:]]
                 annot_data.append([cls_name,cls_annot])
