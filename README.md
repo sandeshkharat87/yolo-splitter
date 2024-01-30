@@ -109,6 +109,12 @@ MyDataset-splitted/
 # Change Log
 ## Stable
 
+* 2023-01-30 version 4.9
+    * Fixed Fixes Annotation Parse Error. Thanks to [https://github.com/Xiteed] 
+       
+* 2023-12-20 version 4.8
+    * Changed yaml file style
+
 * 2023-12-19 version 4.7
     * Fix output dir of `val` to `valid` thanks to [https://github.com/AndreasFridh]
     * Added `ys.info()` To see train/test/val split size, total error files, all class names from annotation files
