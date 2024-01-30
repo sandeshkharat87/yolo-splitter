@@ -25,7 +25,8 @@ ys.info()
 # to see dataframe
 ys.get_dataframe()
 ```
-![2023-10-08_23-28](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/6e08285d-59c5-4856-8bb5-2eac5f1ec3da)
+![2024-01-30_08-14](https://github.com/sandeshkharat87/yolo-splitter/assets/47347413/19ce6aef-e9fd-4815-9534-ccc90aed79fc)
+
 
 
 
