@@ -40,6 +40,12 @@ Saving New split in 'potholes' dir
 ```
 
 ```python
+ys.info()
+# output
+{'train': 122, 'val': 35, 'test': 17, 'cls_names': {0, 1}, 'errors': 0}
+```
+
+```python
 # Use ys.show_show_errors  to show filename which have errors
 ys.show_errors()
 
