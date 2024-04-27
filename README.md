@@ -29,7 +29,6 @@ ys.get_dataframe()
 
 
 
-
 ```python
 ys.save_split(output_dir="potholes")
 ```
@@ -37,12 +36,6 @@ ys.save_split(output_dir="potholes")
 ```bash
 Saving New split in 'potholes' dir
 100%|██████████| 118/118 [00:00<00:00, 1352.79it/s]
-```
-
-```python
-ys.info()
-# output
-{'train': 122, 'val': 35, 'test': 17, 'cls_names': {0, 1}, 'errors': 0}
 ```
 
 ```python
@@ -116,6 +109,10 @@ MyDataset-splitted/
 # Change Log
 ## Stable
 
+* 2023-04-25 version 4.9.1
+    * Fixed. "Having a newline at the end of the file causes an error:
+      ValueError('invalid literal for int() with base 10: ''')". Thanks to [https://github.com/Maxvgrad] for finding bug.
+
 * 2023-01-30 version 4.9
     * Fixed Fixes Annotation Parse Error. Thanks to [https://github.com/Xiteed] 
        
@@ -128,4 +125,3 @@ MyDataset-splitted/
     * Changed `ys.show_dataframe` to `ys.get_dataframe()`
     * small bug fixes
     
-
