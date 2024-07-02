@@ -78,7 +78,6 @@ class YoloSplitter:
         """
         self.__DATAFRAME = None
         self.__error_files = []
-        self.__input_dir = input_dir
 
         set_dir_names = [
             i for i in os.listdir(input_dir) if i in ["train", "test", "valid"]
