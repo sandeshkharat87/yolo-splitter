@@ -166,9 +166,10 @@ class YoloSplitter:
         if round(sum(ratio), 5) != 1:
             raise ValueError("Ratio sum should be equal to 1")
 
-        if len(ratio) == 2 or len(ratio) == 3:
+        if len(ratio) == 2:
             train_ratio, val_ratio = ratio
-
+        elif len(ratio) == 3:
+            train_ratio, val_ratio, _ = ratio
         else:
             raise ValueError("Ratio must be tuple length of 2 or 3")
 
