@@ -4,8 +4,28 @@ import tqdm
 import shutil as sh
 import yaml
 import random
-import click
+from time import time
+import logging
+import multiprocessing as mp
 
+
+def read_annot(path):
+    """
+    Args:
+        path (str): annotation file full path with .txt extension
+    """
+    annot_data = []
+    all_cls_names = []
+    with open(path, "r") as f:
+        f_data = f.read().split("\n")
+        f_data = [line for line in f_data if line.strip()]
+        for i in f_data:
+            i = i.strip().split(" ")
+            cls_name = int(i[0])
+            cls_annot = [float(i) for i in i[1:]]
+            annot_data.append([cls_name, cls_annot])
+            all_cls_names.append(cls_name)
+    return annot_data, list(set(all_cls_names))
 
 class YoloSplitter:
     def __init__(self, imgFormat=[".jpg", ".jpeg", ".png"], labelFormat=[".txt"]):
@@ -63,10 +83,14 @@ class YoloSplitter:
         set_dir_names = [
             i for i in os.listdir(input_dir) if i in ["train", "test", "valid"]
         ]
+
+        # TODO structure with images and labels as folder and train, test and valid as subfolder
+        # TODO structure with val as subfolder
+
         all_dataframes = []
 
         for folder_name in set_dir_names:
-            os.path.join(input_dir, folder_name)
+            
             image_dir = os.path.join(input_dir, folder_name, "images")
             label_dir = os.path.join(input_dir, folder_name, "labels")
             dataset = self.get_data(image_dir=image_dir, label_dir=label_dir)
@@ -84,7 +108,7 @@ class YoloSplitter:
 
         self.__DATAFRAME = splitted_df
 
-        print(self.info())
+        logging.info(self.info())
 
         if return_df:
             return self.__DATAFRAME[self.__req_cols]
@@ -101,50 +125,44 @@ class YoloSplitter:
             "cls_names": [],
         }
 
+        startImageFile = time()
         All_Images = [
             i
             for i in os.listdir(f"{image_dir}")
             if os.path.splitext(i)[-1] in self.imgFormat
         ]
-        All_Labels = [
+        endImageFile = time()
+        logging.debug(f"Time execution list images {endImageFile-startImageFile}s - found {len(All_Images)} elements")
+
+
+        startLebelFile = time()
+        All_Labels =  [
             i
             for i in os.listdir(f"{label_dir}")
             if os.path.splitext(i)[-1] in self.labelFormat
         ]
+        endLebelFile = time()
+        logging.debug(f"Time execution list labels {endLebelFile-startLebelFile}s - found {len(All_Labels)} elements")
 
-        for iname in All_Images:
-            for lname in All_Labels:
-                if os.path.splitext(iname)[0] == os.path.splitext(lname)[0]:
-                    try:
-                        annot_data, cls_names = self.__read_annot(
-                            os.path.join(label_dir, lname)
-                        )
-                        dataset["images_path"].append(os.path.join(image_dir, iname))
-                        dataset["labels_path"].append(os.path.join(label_dir, lname))
-                        dataset["images"].append(os.path.join(iname))
-                        dataset["labels"].append(os.path.join(lname))
-                        dataset["annots"].append(annot_data)
-                        dataset["cls_names"].append(cls_names)
-                    except Exception as e:
-                        self.__error_files.append([os.path.join(label_dir, lname), e])
-                else:
+
+        startReadAnnotation = time()
+        tmp_images_to_check = [os.path.splitext(x)[0] for x in All_Images]
+        with mp.Pool(mp.cpu_count() // 2) as pool:    
+            for i, temparray in enumerate(pool.map(read_annot, [os.path.join(label_dir, lname) for lname in All_Labels])):
+                annot_data, cls_names = temparray
+                if os.path.splitext(All_Labels[i])[0] not in tmp_images_to_check:
                     continue
+                dataset["images_path"].append(os.path.join(image_dir, All_Images[i]))
+                dataset["labels_path"].append(os.path.join(label_dir, All_Labels[i]))
+                dataset["images"].append(os.path.join(All_Images[i]))
+                dataset["labels"].append(os.path.join(All_Images[i]))
+                dataset["annots"].append(annot_data)
+                dataset["cls_names"].append(cls_names)
+        endReadAnnotation = time()
+        logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset)} elements")
 
         return dataset
 
-    def __read_annot(self, path):
-        annot_data = []
-        all_cls_names = []
-        with open(path, "r") as f:
-            f_data = f.read().split("\n")
-            f_data = [line for line in f_data if line.strip()]
-            for i in f_data:
-                i = i.strip().split(" ")
-                cls_name = int(i[0])
-                cls_annot = [float(i) for i in i[1:]]
-                annot_data.append([cls_name, cls_annot])
-                all_cls_names.append(cls_name)
-        return annot_data, list(set(all_cls_names))
 
     def __make_split(self, input_df, ratio):
         if round(sum(ratio), 5) != 1:
