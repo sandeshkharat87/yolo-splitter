@@ -58,14 +58,14 @@ class YoloSplitter:
         input_df["set"] = ""
 
         if self.__error_files:
-            print(f"Total Error Files: {len(self.__error_files)} ")
+            logging.warn(f"Total Error Files: {len(self.__error_files)} ")
 
         # Splitted df (train/test/val)
         splitted_df = self.__make_split(input_df, ratio=ratio)
 
         self.__DATAFRAME = splitted_df
 
-        print(self.info())
+        logging.info(self.info())
 
         if return_df:
             return self.__DATAFRAME[self.__req_cols]
@@ -99,7 +99,7 @@ class YoloSplitter:
             all_dataframes.append(temp_df)
 
         if self.__error_files:
-            print(f"Total Error Files: {len(self.__error_files)} ")
+            logging.warn(f"Total Error Files: {len(self.__error_files)} ")
 
         input_df = pd.concat(all_dataframes, ignore_index=True, sort=False)
 
@@ -159,7 +159,7 @@ class YoloSplitter:
                 dataset["annots"].append(annot_data)
                 dataset["cls_names"].append(cls_names)
         endReadAnnotation = time()
-        logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset)} elements")
+        logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset["images_path"])} elements")
 
         return dataset
 
@@ -200,7 +200,7 @@ class YoloSplitter:
         splitted_df = pd.concat(
             [train_df, val_df, test_df], ignore_index=True, sort=False
         )
-        print(
+        logging.info(
             f"\nTrain size:{train_length},Validation size:{val_length},Test size :{test_length}\n"
         )
 
@@ -236,7 +236,7 @@ class YoloSplitter:
 
         input_df = self.__DATAFRAME
 
-        print(f"Saving New split in '{output_dir}' dir")
+        logging.info(f"Saving New split in '{output_dir}' dir")
 
         if input_df is None:
             raise ValueError(
