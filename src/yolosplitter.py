@@ -80,11 +80,10 @@ class YoloSplitter:
         self.__error_files = []
 
         set_dir_names = [
-            i for i in os.listdir(input_dir) if i in ["train", "test", "valid"]
+            i for i in os.listdir(input_dir) if i in ["train", "test", "valid", "val"]
         ]
 
         # TODO structure with images and labels as folder and train, test and valid as subfolder
-        # TODO structure with val as subfolder
 
         all_dataframes = []
 
@@ -167,15 +166,11 @@ class YoloSplitter:
         if round(sum(ratio), 5) != 1:
             raise ValueError("Ratio sum should be equal to 1")
 
-        if len(ratio) == 2:
+        if len(ratio) == 2 or len(ratio) == 3:
             train_ratio, val_ratio = ratio
-            test_ratio = 0
-
-        elif len(ratio) == 3:
-            train_ratio, val_ratio, test_ratio = ratio
 
         else:
-            raise ValueError("ratio must be tuple length of 2 or 3")
+            raise ValueError("Ratio must be tuple length of 2 or 3")
 
         total_length = len(input_df)
         train_length = round(train_ratio * len(input_df))
