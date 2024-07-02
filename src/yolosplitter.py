@@ -6,7 +6,6 @@ import yaml
 import random
 from time import time
 import logging
-import multiprocessing as mp
 
 
 def read_annot(path):
@@ -25,7 +24,7 @@ def read_annot(path):
             cls_annot = [float(i) for i in i[1:]]
             annot_data.append([cls_name, cls_annot])
             all_cls_names.append(cls_name)
-    return annot_data, list(set(all_cls_names))
+    return annot_data, list(set(all_cls_names)), os.path.basename(path)
 
 class YoloSplitter:
     def __init__(self, imgFormat=[".jpg", ".jpeg", ".png"], labelFormat=[".txt"]):
@@ -87,8 +86,7 @@ class YoloSplitter:
 
         all_dataframes = []
 
-        for folder_name in set_dir_names:
-            
+        for folder_name in set_dir_names:            
             image_dir = os.path.join(input_dir, folder_name, "images")
             label_dir = os.path.join(input_dir, folder_name, "labels")
             dataset = self.get_data(image_dir=image_dir, label_dir=label_dir)
@@ -133,29 +131,32 @@ class YoloSplitter:
         logging.debug(f"Time execution list images {endImageFile-startImageFile}s - found {len(All_Images)} elements")
 
 
-        startLebelFile = time()
+        startLabelFile = time()
         All_Labels =  [
             i
             for i in os.listdir(f"{label_dir}")
             if os.path.splitext(i)[-1] in self.labelFormat
         ]
-        endLebelFile = time()
-        logging.debug(f"Time execution list labels {endLebelFile-startLebelFile}s - found {len(All_Labels)} elements")
+        endLabelFile = time()
+        logging.debug(f"Time execution list labels {endLabelFile-startLabelFile}s - found {len(All_Labels)} elements")
 
-
+        # Keep only images that have labels and vice-versa
+        startCommonFile = time()
+        common_files = list(set([os.path.splitext(x)[0] for x in All_Images]).intersection([os.path.splitext(x)[0] for x in All_Labels]))
+        All_Images = sorted([x for x in All_Images if (os.path.splitext(x)[0] in common_files)])
+        All_Labels = sorted([x for x in All_Labels if (os.path.splitext(x)[0] in common_files)])
+        endCommonFile = time()
+        logging.debug(f"Time execution find common files {endCommonFile-startCommonFile}s - found {len(All_Labels)} elements")
+ 
         startReadAnnotation = time()
-        tmp_images_to_check = [os.path.splitext(x)[0] for x in All_Images]
-        with mp.Pool(mp.cpu_count() // 2) as pool:    
-            for i, temparray in enumerate(pool.map(read_annot, [os.path.join(label_dir, lname) for lname in All_Labels])):
-                annot_data, cls_names = temparray
-                if os.path.splitext(All_Labels[i])[0] not in tmp_images_to_check:
-                    continue
-                dataset["images_path"].append(os.path.join(image_dir, os.path.splitext(All_Labels[i])[0] + '.jpg'))
-                dataset["labels_path"].append(os.path.join(label_dir, All_Labels[i]))
-                dataset["images"].append(os.path.join(os.path.splitext(All_Labels[i])[0] + '.jpg'))
-                dataset["labels"].append(os.path.join(All_Labels[i]))
-                dataset["annots"].append(annot_data)
-                dataset["cls_names"].append(cls_names)
+        for i, (annot_data, cls_names, lbl_file) in enumerate([read_annot(os.path.join(label_dir, item)) for item in All_Labels]):
+            img_file = All_Images[i]
+            dataset["images_path"].append(os.path.join(image_dir, img_file))
+            dataset["labels_path"].append(os.path.join(label_dir, lbl_file))
+            dataset["images"].append(img_file)
+            dataset["labels"].append(lbl_file)
+            dataset["annots"].append(annot_data)
+            dataset["cls_names"].append(cls_names)
         endReadAnnotation = time()
         logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset["images_path"])} elements")
 
