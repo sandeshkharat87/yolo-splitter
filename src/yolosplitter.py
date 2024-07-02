@@ -183,7 +183,7 @@ class YoloSplitter:
 
         # Shuffle new_set column to new set
         set_names = (
-            ["train"] * train_length + ["valid"] * val_length + ["test"] * test_length
+            ["train"] * train_length + ["val"] * val_length + ["test"] * test_length
         )
         random.shuffle(set_names)
 
@@ -194,9 +194,7 @@ class YoloSplitter:
         splitted_df = pd.concat(
             [train_df, val_df, test_df], ignore_index=True, sort=False
         )
-        logging.info(
-            f"\nTrain size:{train_length},Validation size:{val_length},Test size :{test_length}\n"
-        )
+        logging.info(f"Train size:{train_length},Validation size:{val_length},Test size :{test_length}")
 
         _cls_names = set(
             [name for name_list in splitted_df["cls_names"] for name in name_list]
@@ -216,7 +214,8 @@ class YoloSplitter:
         return self.__error_files
 
     def get_dataframe(self):
-        return self.__DATAFRAME[self.__req_cols]
+        if self.__DATAFRAME is not None:
+            return self.__DATAFRAME[self.__req_cols]
 
     def info(self):
         return self.__info
@@ -232,7 +231,7 @@ class YoloSplitter:
 
         logging.info(f"Saving New split in '{output_dir}' dir")
 
-        if input_df is None:
+        if input_df is None or self.__DATAFRAME is None:
             raise ValueError(
                 "Dataframe is not created. Plase ran from_yolo_dir or from_mixed_dir first"
             )
@@ -271,14 +270,14 @@ class YoloSplitter:
             self.__DATAFRAME.new_set.value_counts().to_dict()[i]
             if i in self.__DATAFRAME.new_set.value_counts().to_dict()
             else 0
-            for i in ["train", "valid", "test"]
+            for i in ["train", "val", "test"]
         ]
 
         yamlFile["nc"] = len(cls_names)
         yamlFile["names"] = cls_names
         yamlFile["train"] = os.path.join(output_dir, "train")
         if valid_set != 0:
-            yamlFile["val"] = os.path.join(output_dir, "valid")
+            yamlFile["val"] = os.path.join(output_dir, "val")
         if test_set != 0:
             yamlFile["test"] = os.path.join(output_dir, "test")
 
