@@ -150,10 +150,10 @@ class YoloSplitter:
                 annot_data, cls_names = temparray
                 if os.path.splitext(All_Labels[i])[0] not in tmp_images_to_check:
                     continue
-                dataset["images_path"].append(os.path.join(image_dir, All_Images[i]))
+                dataset["images_path"].append(os.path.join(image_dir, os.path.splitext(All_Labels[i])[0] + '.jpg'))
                 dataset["labels_path"].append(os.path.join(label_dir, All_Labels[i]))
-                dataset["images"].append(os.path.join(All_Images[i]))
-                dataset["labels"].append(os.path.join(All_Images[i]))
+                dataset["images"].append(os.path.join(os.path.splitext(All_Labels[i])[0] + '.jpg'))
+                dataset["labels"].append(os.path.join(All_Labels[i]))
                 dataset["annots"].append(annot_data)
                 dataset["cls_names"].append(cls_names)
         endReadAnnotation = time()
