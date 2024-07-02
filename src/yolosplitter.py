@@ -81,9 +81,7 @@ class YoloSplitter:
         set_dir_names = [
             i for i in os.listdir(input_dir) if i in ["train", "test", "valid", "val"]
         ]
-
-        # TODO structure with images and labels as folder and train, test and valid as subfolder
-
+        
         all_dataframes = []
 
         for folder_name in set_dir_names:            
@@ -161,7 +159,6 @@ class YoloSplitter:
         logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset["images_path"])} elements")
 
         return dataset
-
 
     def __make_split(self, input_df, ratio):
         if round(sum(ratio), 5) != 1:
