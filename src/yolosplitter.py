@@ -4,8 +4,27 @@ import tqdm
 import shutil as sh
 import yaml
 import random
-import click
+from time import time
+import logging
 
+
+def read_annot(path):
+    """
+    Args:
+        path (str): annotation file full path with .txt extension
+    """
+    annot_data = []
+    all_cls_names = []
+    with open(path, "r") as f:
+        f_data = f.read().split("\n")
+        f_data = [line for line in f_data if line.strip()]
+        for i in f_data:
+            i = i.strip().split(" ")
+            cls_name = int(i[0])
+            cls_annot = [float(i) for i in i[1:]]
+            annot_data.append([cls_name, cls_annot])
+            all_cls_names.append(cls_name)
+    return annot_data, list(set(all_cls_names)), os.path.basename(path)
 
 class YoloSplitter:
     def __init__(self, imgFormat=[".jpg", ".jpeg", ".png"], labelFormat=[".txt"]):
@@ -38,14 +57,14 @@ class YoloSplitter:
         input_df["set"] = ""
 
         if self.__error_files:
-            print(f"Total Error Files: {len(self.__error_files)} ")
+            logging.warn(f"Total Error Files: {len(self.__error_files)} ")
 
         # Splitted df (train/test/val)
         splitted_df = self.__make_split(input_df, ratio=ratio)
 
         self.__DATAFRAME = splitted_df
 
-        print(self.info())
+        logging.info(self.info())
 
         if return_df:
             return self.__DATAFRAME[self.__req_cols]
@@ -58,15 +77,14 @@ class YoloSplitter:
         """
         self.__DATAFRAME = None
         self.__error_files = []
-        self.__input_dir = input_dir
 
         set_dir_names = [
-            i for i in os.listdir(input_dir) if i in ["train", "test", "valid"]
+            i for i in os.listdir(input_dir) if i in ["train", "test", "valid", "val"]
         ]
+        
         all_dataframes = []
 
-        for folder_name in set_dir_names:
-            os.path.join(input_dir, folder_name)
+        for folder_name in set_dir_names:            
             image_dir = os.path.join(input_dir, folder_name, "images")
             label_dir = os.path.join(input_dir, folder_name, "labels")
             dataset = self.get_data(image_dir=image_dir, label_dir=label_dir)
@@ -75,7 +93,7 @@ class YoloSplitter:
             all_dataframes.append(temp_df)
 
         if self.__error_files:
-            print(f"Total Error Files: {len(self.__error_files)} ")
+            logging.warn(f"Total Error Files: {len(self.__error_files)} ")
 
         input_df = pd.concat(all_dataframes, ignore_index=True, sort=False)
 
@@ -84,7 +102,7 @@ class YoloSplitter:
 
         self.__DATAFRAME = splitted_df
 
-        print(self.info())
+        logging.info(self.info())
 
         if return_df:
             return self.__DATAFRAME[self.__req_cols]
@@ -101,50 +119,46 @@ class YoloSplitter:
             "cls_names": [],
         }
 
+        startImageFile = time()
         All_Images = [
             i
             for i in os.listdir(f"{image_dir}")
             if os.path.splitext(i)[-1] in self.imgFormat
         ]
-        All_Labels = [
+        endImageFile = time()
+        logging.debug(f"Time execution list images {endImageFile-startImageFile}s - found {len(All_Images)} elements")
+
+
+        startLabelFile = time()
+        All_Labels =  [
             i
             for i in os.listdir(f"{label_dir}")
             if os.path.splitext(i)[-1] in self.labelFormat
         ]
+        endLabelFile = time()
+        logging.debug(f"Time execution list labels {endLabelFile-startLabelFile}s - found {len(All_Labels)} elements")
 
-        for iname in All_Images:
-            for lname in All_Labels:
-                if os.path.splitext(iname)[0] == os.path.splitext(lname)[0]:
-                    try:
-                        annot_data, cls_names = self.__read_annot(
-                            os.path.join(label_dir, lname)
-                        )
-                        dataset["images_path"].append(os.path.join(image_dir, iname))
-                        dataset["labels_path"].append(os.path.join(label_dir, lname))
-                        dataset["images"].append(os.path.join(iname))
-                        dataset["labels"].append(os.path.join(lname))
-                        dataset["annots"].append(annot_data)
-                        dataset["cls_names"].append(cls_names)
-                    except Exception as e:
-                        self.__error_files.append([os.path.join(label_dir, lname), e])
-                else:
-                    continue
+        # Keep only images that have labels and vice-versa
+        startCommonFile = time()
+        common_files = list(set([os.path.splitext(x)[0] for x in All_Images]).intersection([os.path.splitext(x)[0] for x in All_Labels]))
+        All_Images = sorted([x for x in All_Images if (os.path.splitext(x)[0] in common_files)])
+        All_Labels = sorted([x for x in All_Labels if (os.path.splitext(x)[0] in common_files)])
+        endCommonFile = time()
+        logging.debug(f"Time execution find common files {endCommonFile-startCommonFile}s - found {len(All_Labels)} elements")
+ 
+        startReadAnnotation = time()
+        for i, (annot_data, cls_names, lbl_file) in enumerate([read_annot(os.path.join(label_dir, item)) for item in All_Labels]):
+            img_file = All_Images[i]
+            dataset["images_path"].append(os.path.join(image_dir, img_file))
+            dataset["labels_path"].append(os.path.join(label_dir, lbl_file))
+            dataset["images"].append(img_file)
+            dataset["labels"].append(lbl_file)
+            dataset["annots"].append(annot_data)
+            dataset["cls_names"].append(cls_names)
+        endReadAnnotation = time()
+        logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset["images_path"])} elements")
 
         return dataset
-
-    def __read_annot(self, path):
-        annot_data = []
-        all_cls_names = []
-        with open(path, "r") as f:
-            f_data = f.read().split("\n")
-            f_data = [line for line in f_data if line.strip()]
-            for i in f_data:
-                i = i.strip().split(" ")
-                cls_name = int(i[0])
-                cls_annot = [float(i) for i in i[1:]]
-                annot_data.append([cls_name, cls_annot])
-                all_cls_names.append(cls_name)
-        return annot_data, list(set(all_cls_names))
 
     def __make_split(self, input_df, ratio):
         if round(sum(ratio), 5) != 1:
@@ -152,13 +166,10 @@ class YoloSplitter:
 
         if len(ratio) == 2:
             train_ratio, val_ratio = ratio
-            test_ratio = 0
-
         elif len(ratio) == 3:
-            train_ratio, val_ratio, test_ratio = ratio
-
+            train_ratio, val_ratio, _ = ratio
         else:
-            raise ValueError("ratio must be tuple length of 2 or 3")
+            raise ValueError("Ratio must be tuple length of 2 or 3")
 
         total_length = len(input_df)
         train_length = round(train_ratio * len(input_df))
@@ -171,7 +182,7 @@ class YoloSplitter:
 
         # Shuffle new_set column to new set
         set_names = (
-            ["train"] * train_length + ["valid"] * val_length + ["test"] * test_length
+            ["train"] * train_length + ["val"] * val_length + ["test"] * test_length
         )
         random.shuffle(set_names)
 
@@ -182,9 +193,7 @@ class YoloSplitter:
         splitted_df = pd.concat(
             [train_df, val_df, test_df], ignore_index=True, sort=False
         )
-        print(
-            f"\nTrain size:{train_length},Validation size:{val_length},Test size :{test_length}\n"
-        )
+        logging.info(f"Train size:{train_length},Validation size:{val_length},Test size :{test_length}")
 
         _cls_names = set(
             [name for name_list in splitted_df["cls_names"] for name in name_list]
@@ -204,7 +213,8 @@ class YoloSplitter:
         return self.__error_files
 
     def get_dataframe(self):
-        return self.__DATAFRAME[self.__req_cols]
+        if self.__DATAFRAME is not None:
+            return self.__DATAFRAME[self.__req_cols]
 
     def info(self):
         return self.__info
@@ -218,9 +228,9 @@ class YoloSplitter:
 
         input_df = self.__DATAFRAME
 
-        print(f"Saving New split in '{output_dir}' dir")
+        logging.info(f"Saving New split in '{output_dir}' dir")
 
-        if input_df is None:
+        if input_df is None or self.__DATAFRAME is None:
             raise ValueError(
                 "Dataframe is not created. Plase ran from_yolo_dir or from_mixed_dir first"
             )
@@ -259,14 +269,14 @@ class YoloSplitter:
             self.__DATAFRAME.new_set.value_counts().to_dict()[i]
             if i in self.__DATAFRAME.new_set.value_counts().to_dict()
             else 0
-            for i in ["train", "valid", "test"]
+            for i in ["train", "val", "test"]
         ]
 
         yamlFile["nc"] = len(cls_names)
         yamlFile["names"] = cls_names
         yamlFile["train"] = os.path.join(output_dir, "train")
         if valid_set != 0:
-            yamlFile["val"] = os.path.join(output_dir, "valid")
+            yamlFile["val"] = os.path.join(output_dir, "val")
         if test_set != 0:
             yamlFile["test"] = os.path.join(output_dir, "test")
 
