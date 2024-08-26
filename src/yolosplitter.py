@@ -156,7 +156,7 @@ class YoloSplitter:
             dataset["annots"].append(annot_data)
             dataset["cls_names"].append(cls_names)
         endReadAnnotation = time()
-        logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset["images_path"])} elements")
+        logging.debug(f"Time execution read dataset {endReadAnnotation-startReadAnnotation}s for {len(dataset['images_path'])} elements")
 
         return dataset
 
