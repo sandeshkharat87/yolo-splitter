@@ -108,7 +108,9 @@ MyDataset-splitted/
 ```
 # Change Log
 ## Stable
-
+* 2024-08-26 version 5.0.0
+    * Optimize code and speedup execution. Thanks for incredible work [https://github.com/MarcelloCuoghi]
+      
 * 2023-04-25 version 4.9.1
     * Fixed. "Having a newline at the end of the file causes an error:
       ValueError('invalid literal for int() with base 10: ''')". Thanks to [https://github.com/Maxvgrad] for finding bug.
